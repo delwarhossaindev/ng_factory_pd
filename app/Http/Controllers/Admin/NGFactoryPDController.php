@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -55,10 +56,10 @@ class NGFactoryPDController extends Controller
                                 <i class="tf-icons bx bxs-edit"></i>
                               </a>';
 
-            //         $btn .= ' <button type="button" class="btn btn-danger btn-sm delete-btn"
-            //       data-id="' . $row->ProposalID . '" title="Delete">
-            //       <i class="tf-icons bx bxs-trash"></i>
-            //   </button>';
+                    //         $btn .= ' <button type="button" class="btn btn-danger btn-sm delete-btn"
+                    //       data-id="' . $row->ProposalID . '" title="Delete">
+                    //       <i class="tf-icons bx bxs-trash"></i>
+                    //   </button>';
 
                     return $btn;
                 })
@@ -109,26 +110,26 @@ class NGFactoryPDController extends Controller
                 'OriginatorBrand' => $request->OriginatorBrand ?? '',
             ]);
 
-           if(isset($request->ServicesOneStrength)){
+            if (isset($request->ServicesOneStrength)) {
 
-            foreach ($request->ServicesOneStrength as $key => $value) {
-                $proposalGeneralInfo->details()->create([
-                    'ProposalID' => $proposalMaster->ProposalID,
-                    'StrengthDosageForm' => $value,
-                    'PackSize' => $request->PackSize[$key],
-                    'PrimaryPack' => $request->PrimaryPack[$key],
-                    'MRPUnit' => $request->MRPUnit[$key],
-                    'MRPPack' => $request->MRPPack[$key],
-                    'TP' => $request->TP[$key],
-                    'DCCNumber' => $request->DCCNumber[$key],
-                    'Availability' => $request->Availability[$key],
-                ]);
+                foreach ($request->ServicesOneStrength as $key => $value) {
+                    $proposalGeneralInfo->details()->create([
+                        'ProposalID' => $proposalMaster->ProposalID,
+                        'StrengthDosageForm' => $value,
+                        'PackSize' => $request->PackSize[$key],
+                        'PrimaryPack' => $request->PrimaryPack[$key],
+                        'MRPUnit' => $request->MRPUnit[$key],
+                        'MRPPack' => $request->MRPPack[$key],
+                        'TP' => $request->TP[$key],
+                        'DCCNumber' => $request->DCCNumber[$key],
+                        'Availability' => $request->Availability[$key],
+                    ]);
+                }
             }
-           }
-          
 
 
-            if(isset($request->ServicesTwoStrength)){
+
+            if (isset($request->ServicesTwoStrength)) {
                 foreach ($request->ServicesTwoStrength as $key => $value) {
                     $proposalMaster->forecasts()->create([
                         'StrengthDosageForm' => $value,
@@ -143,7 +144,7 @@ class NGFactoryPDController extends Controller
                 }
             }
 
-          
+
 
             DB::commit();
 
@@ -159,7 +160,12 @@ class NGFactoryPDController extends Controller
     {
         $proposal = ProposalMaster::with(['referenceStatuses', 'generalInfo.details', 'forecasts'])->findOrFail($id);
 
-        return view('admin.proposal.show', compact('proposal'));
+        $ProposedBy = $proposal->CreatedBy ? User::where('UserID', $proposal->CreatedBy)->first() : NULL;
+        $EvaluatedBy = $proposal->EvaluatedBy ? User::where('UserID', $proposal->EvaluatedBy)->first() : NULL;
+        $RecommendedBy = $proposal->RecommendedBy ? User::where('UserID', $proposal->RecommendedBy)->first() : NULL;
+
+
+        return view('admin.proposal.show', compact('proposal', 'ProposedBy', 'EvaluatedBy', 'RecommendedBy'));
     }
 
     public function requestForApprovalShow($id)
@@ -177,7 +183,7 @@ class NGFactoryPDController extends Controller
 
         try {
 
-    
+
 
             $status = $request->Status;
             $proposalMaster = ProposalMaster::findOrFail($request->ProposalID);
@@ -186,7 +192,7 @@ class NGFactoryPDController extends Controller
             if ($status == 'Approved') {
                 if ($proposalMaster->RecommendedBy == auth()->id()) {
                     $proposalMaster->update([
-                       
+
                         'RecommendedStatus' => $status,
                         'StatusID' => 1,
                     ]);
@@ -199,10 +205,8 @@ class NGFactoryPDController extends Controller
                         'RecommendedBy' => $request->ForwardTo ?? null,
                     ]);
                 }
-
-
             }
-            
+
             if ($status == 'Declined') {
 
                 if ($proposalMaster->EvaluatedBy == auth()->id()) {
@@ -225,9 +229,6 @@ class NGFactoryPDController extends Controller
                         'StatusID' => 2,
                     ]);
                 }
-
-
-
             }
 
             DB::commit();
@@ -238,9 +239,6 @@ class NGFactoryPDController extends Controller
             dd($th->getMessage());
             return back()->withError('Error: ' . $th->getMessage());
         }
-
-
-
     }
 
     public function edit($id)
@@ -400,5 +398,4 @@ class NGFactoryPDController extends Controller
 
         return view('admin.proposal.request_for_approval');
     }
-
 }

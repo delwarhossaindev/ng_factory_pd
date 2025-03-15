@@ -1,6 +1,6 @@
 <x-app-component>
     <x-page.page-title data="Credit Note Information" />
-    
+
     <x-slot name="style">
         <link rel="stylesheet" href="{{ asset('css/print.css') }}">
         <style>
@@ -28,7 +28,7 @@
                     font-size: 16px;
                     font-weight: bold;
                 }
-               
+
             }
         </style>
     </x-slot>
@@ -49,7 +49,7 @@
                         <p class="mb-2"><b>New Product Category : </b>{{ $proposal->ProductCategory }} </p>
                         <p class="mb-0"><b>Reference Status : </b> {{ implode(', ',  $saveStatus) }}</p>
                     </div>
-                    
+
                     <br>
                     <h5>A. GENERAL INFORMATION</h5>
                     <div class="row">
@@ -76,13 +76,13 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">Strength & Dosage Form</th>
-                                        <th class="text-center">Pack Size</th>
+                                        <th class="text-center">Pack <br> Size</th>
                                         <th class="text-center">Primary Pack</th>
-                                        <th class="text-center">MRP/Unit (Tk.)</th>
-                                        <th class="text-center">MRP/Pack (Tk.)</th>
-                                        <th class="text-center">TP/Pack (Tk.)</th>
-                                        <th class="text-center">DCC Number</th>
-                                        <th class="text-center">Availability in BD</th>
+                                        <th class="text-center">IP or MRP <br>/Unit (Tk.)</th>
+                                        <th class="text-center">IP or MRP <br>/Pack (Tk.)</th>
+                                        <th class="text-center">TP/Pack<br>(Tk.)</th>
+                                        <th class="text-center">DCC <br> Number</th>
+                                        <th class="text-center">Availability in <br> BD</th>
                                     </tr>
                                 </thead>
                                 <tbody id="services">
@@ -116,15 +116,15 @@
                                         <th colspan="2" class="text-center">Year-1</th>
                                         <th colspan="2" class="text-center">Year-2</th>
                                         <th colspan="2" class="text-center">Year-3</th>
-                                        <th rowspan="2" class="text-center">Launching Month</th>
+                                        <th rowspan="2" class="text-center">Launching <br> Month</th>
                                     </tr>
                                     <tr>
                                         <th class="text-center">Unit</th>
-                                        <th class="text-center">Value</th>
+                                        <th class="text-center">Value (M)</th>
                                         <th class="text-center">Unit</th>
-                                        <th class="text-center">Value</th>
+                                        <th class="text-center">Value (M)</th>
                                         <th class="text-center">Unit</th>
-                                        <th class="text-center">Value</th>
+                                        <th class="text-center">Value (M)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -150,8 +150,8 @@
                       @csrf
                                 <div class="row">
                                 <input type="hidden" name="ProposalID" value="{{ $proposal->ProposalID }}">
-                               
-                             
+
+
                                 @if (!($proposal->RecommendedBy == auth()->id()))
                                 <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Forward To<span class="bg-red"> *</span></label>
                                 <div class="col-sm-4 mt-3">
@@ -167,9 +167,9 @@
                                 <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Recommended By<span class="bg-red"> *</span></label>
 
                                 <div class="col-sm-4 mt-3">{{ auth()->user()->UserName }}</div>
-                                    
+
                                 @endif
-                             
+
                                 <div class="col-sm-6"></div>
 
                                 <label class="col-sm-2 col-form-label mt-3" for="Status">Status<span class="bg-red"> *</span></label>
@@ -180,7 +180,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-6">
-                                    
+
                                 </div>
                                 </div>
                                  <div class="row ">
@@ -197,7 +197,7 @@
 </x-app-component>
 
 <script>
-  
-    
+
+
 
 </script>
