@@ -1,0 +1,1 @@
+.sLoading{background:url(https://media4.giphy.com/media/ZO9b1ntYVJmjZlsWlm/giphy.gif?cid=ecf05e47j6t5b5tyu1lte87gtrz9lbax03d190advah46h4y&rid=giphy.gif&ct=g) no-repeat right center;background-size:100px 100px}

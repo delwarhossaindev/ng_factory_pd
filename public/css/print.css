@@ -1,0 +1,9 @@
+.motors_table th{
+    font-size: 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-weight: 700;
+}
+.motors_table td{
+    font-size: 12px;
+}

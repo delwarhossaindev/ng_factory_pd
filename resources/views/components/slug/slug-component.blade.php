@@ -1,0 +1,1 @@
+<div class="theme-color"><i class="bx bx-link"></i>{{ URL::to('/').'/' }}<span class="slug" v-text="slug"></span></div>

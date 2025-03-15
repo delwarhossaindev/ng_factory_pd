@@ -1,0 +1,39 @@
+1.congig a gasi 2 ta code laksi tokhon hoia gase
+-config\database.php
+'options'   => [
+                            PDO::ATTR_CASE => PDO::CASE_NATURAL,
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                           ],
+2.Authendication change korsi
+->app\Http\Controllers\Auth\LoginController.php
+public function login(Request $request)
+    {
+      
+        // Validation rules
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        // If validation fails, redirect back with error messages
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // Attempt to authenticate the user
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            return redirect()->route('dashboard')->with('success', 'Welcome to your dashboard!');
+        } else {
+            // Authentication failed, redirect back with error message
+            return redirect()->back()->with('error', 'Invalid credentials. Please try again.')->withInput();
+        }
+    }
+	
+	Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect('/dashboard');
+    }
+    return view('admin.login');
+})->name('login');
+->routes\web.php
+Route::post('/login', [AuthController::class, 'login'])->name('login-user');

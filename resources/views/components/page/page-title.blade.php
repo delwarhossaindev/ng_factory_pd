@@ -1,0 +1,1 @@
+@section('title') {{ $data }} @endsection

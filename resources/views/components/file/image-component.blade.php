@@ -1,0 +1,2 @@
+<input type="text" id="image_label" class="form-control pointer" name="image" aria-label="Image" aria-describedby="button-image" value="Browse file" readonly>
+<img src="" alt="file" id="output" style="width: 100px; height:100px; display:none;" class="mt-2">
