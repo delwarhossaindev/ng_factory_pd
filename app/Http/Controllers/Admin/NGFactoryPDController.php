@@ -23,7 +23,7 @@ class NGFactoryPDController extends Controller
         if ($request->ajax()) {
             $query = ProposalMaster::with(['referenceStatuses', 'generalInfo.details', 'forecasts'])
             ->Where('CreatedBy', auth()->user()->UserID)
-            ->orderByDesc('ProposalID') 
+            ->orderByDesc('ProposalID')
             ->get();
 
             return DataTables::of($query)
@@ -461,7 +461,9 @@ class NGFactoryPDController extends Controller
                 'generalInfo.details',
                 'forecasts'
             ])
-            ->where('PresentDesk', auth()->user()->UserID);
+            ->where('PresentDesk', auth()->user()->UserID)
+            ->where('CreatedBy', '!=', auth()->user()->UserID) // Ensure correct casing in method name
+            ->get();
 
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
