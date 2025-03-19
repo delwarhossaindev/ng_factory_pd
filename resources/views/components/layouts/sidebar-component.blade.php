@@ -43,14 +43,14 @@
                     @if (collect($userMeuns)->where('menu_id', 1)->count() > 0)
                         <li class="menu-item {{ $route == 'ng_factory_pd.create' ? 'active' : '' }}">
                             <a href="{{ route('ng_factory_pd.create') }}" class="menu-link">
-                                <div data-i18n="Account">Add Proposal </div>
+                                <div data-i18n="Account">Proposal Form </div>
                             </a>
                         </li>
                     @endif
                     @if (collect($userMeuns)->where('menu_id', 2)->count() > 0)
                         <li class="menu-item {{ $route == 'ng_factory_pd.index' ? 'active' : '' }}">
                             <a href="{{ route('ng_factory_pd.index') }}" class="menu-link">
-                                <div data-i18n="Account">Proposal  List</div>
+                                <div data-i18n="Account">My Proposal Submission</div>
                             </a>
                         </li>
                     @endif
@@ -79,6 +79,17 @@
                     @endif
                     -->
 
+                    @if (collect($userMeuns)->where('menu_id', 4)->count() > 0)
+                    <li
+                        class="menu-item {{ $route == 'ng_factory_pd.approved_submission_list' ? 'active' : '' }}">
+                        <a href="{{ route('ng_factory_pd.approved_submission_list') }}" class="menu-link">
+                            <div data-i18n="Account">Approved Submission</div>
+                        </a>
+                    </li>
+                  @endif
+
+
+
                     <!-- @if (collect($userMeuns)->where('menu_id', 6)->count() > 0)
                         <li class="menu-item {{ $route == 'credit_note_approval.list' ? 'active' : '' }}">
                             <a href="{{ route('credit_note_approval.list') }}" class="menu-link">
@@ -87,7 +98,7 @@
                         </li>
                     @endif -->
                 </ul>
-            </li> 
+            </li>
 
             @if (collect($userMeuns)->where('menu_id', 7)->count() > 0)
             <li class="menu-header small text-uppercase">

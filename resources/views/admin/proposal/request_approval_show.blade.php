@@ -9,21 +9,27 @@
                     size: A4;
                     margin: 10mm;
                 }
+
                 body {
                     font-size: 7px;
                 }
+
                 .card {
                     page-break-inside: avoid;
                 }
+
                 table {
                     width: 100%;
                     border-collapse: collapse;
                 }
-                th, td {
+
+                th,
+                td {
                     border: 1px solid #000;
                     padding: 5px;
                     text-align: center;
                 }
+
                 h5 {
                     font-size: 16px;
                     font-weight: bold;
@@ -34,9 +40,19 @@
     </x-slot>
 
     <x-slot name="content">
-    @php
-       $saveStatus = collect($proposal->referenceStatuses ?? [])->pluck('ReferenceStatus')->toArray();
-    @endphp
+        @php
+            $saveStatus = collect($proposal->referenceStatuses ?? [])
+                ->pluck('ReferenceStatus')
+                ->toArray();
+            $UserLevel = auth()->user()->UserLevel;
+            $UserID = auth()->user()->UserID;
+            $UserList = DB::table('Supervisor as s')
+                ->leftJoin('UserManager as um', 's.SupervisorID', '=', 'um.UserID')
+                ->where('s.UserID', $UserID)
+                ->select('s.SupervisorID', 'um.UserID', 'um.UserName', 'um.Designation')
+                ->get();
+
+        @endphp
         <div class="card">
             <div class="card-body">
                 <div id="contentToPrint">
@@ -47,7 +63,7 @@
 
                     <div>
                         <p class="mb-2"><b>New Product Category : </b>{{ $proposal->ProductCategory }} </p>
-                        <p class="mb-0"><b>Reference Status : </b> {{ implode(', ',  $saveStatus) }}</p>
+                        <p class="mb-0"><b>Reference Status : </b> {{ implode(', ', $saveStatus) }}</p>
                     </div>
 
                     <br>
@@ -57,16 +73,19 @@
                             <p class="mb-2"><b>Generic Name : </b> {{ $proposal->generalInfo->GenericName }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-2"><b>Therapeutic Class : </b> {{ $proposal->generalInfo->TherapeuticClass }}</p>
+                            <p class="mb-2"><b>Therapeutic Class : </b> {{ $proposal->generalInfo->TherapeuticClass }}
+                            </p>
                         </div>
                         <div class="col-md-12">
                             <p class="mb-2"><b>Indication : </b> {{ $proposal->generalInfo->Indication }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-2"><b>Local Competitors : </b> {{ $proposal->generalInfo->LocalCompetitors }}</p>
+                            <p class="mb-2"><b>Local Competitors : </b> {{ $proposal->generalInfo->LocalCompetitors }}
+                            </p>
                         </div>
                         <div class="col-md-6">
-                            <p class="mb-2"><b>Originator’s Brand : </b> {{ $proposal->generalInfo->OriginatorBrand }}</p>
+                            <p class="mb-2"><b>Originator’s Brand : </b> {{ $proposal->generalInfo->OriginatorBrand }}
+                            </p>
                         </div>
                     </div>
 
@@ -76,35 +95,44 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">Strength & Dosage Form</th>
-                                        <th class="text-center">Pack <br> Size</th>
+                                        <th class="text-center">Pack Size</th>
                                         <th class="text-center">Primary Pack</th>
-                                        <th class="text-center">IP or MRP <br>/Unit (Tk.)</th>
-                                        <th class="text-center">IP or MRP <br>/Pack (Tk.)</th>
-                                        <th class="text-center">TP/Pack<br>(Tk.)</th>
-                                        <th class="text-center">DCC <br> Number</th>
-                                        <th class="text-center">Availability in <br> BD</th>
+                                        <th class="text-center">MRP/Unit (Tk.)</th>
+                                        <th class="text-center">MRP/Pack (Tk.)</th>
+                                        <th class="text-center">TP/Pack (Tk.)</th>
+                                        <th class="text-center">DCC Number</th>
+                                        <th class="text-center">Availability in BD</th>
                                     </tr>
                                 </thead>
                                 <tbody id="services">
 
-                                         @foreach ($proposal->generalInfo->details as $service)
-                                                <tr>
-                                                    <td>{{ $service->StrengthDosageForm }}</td>
-                                                    <td class="text-center">{{ $service->PackSize }}</td>
-                                                    <td class="text-right">{{ $service->PrimaryPack }}</td>
-                                                    <td class="text-right">{{ $service->MRPUnit }}</td>
-                                                    <td class="text-right">{{ $service->MRPPack }}</td>
-                                                    <td class="text-right">{{ $service->TP }}</td>
-                                                    <td class="text-center">{{ $service->DCCNumber }}</td>
-                                                    <td class="text-center">{{ $service->Availability }}</td>
-                                                </tr>
-                                            @endforeach
+                                    @foreach ($proposal->generalInfo->details as $service)
+                                        <tr>
+                                            <td>{{ $service->StrengthDosageForm }}</td>
+                                            <td class="text-center">{{ $service->PackSize }}</td>
+                                            <td class="text-right">{{ $service->PrimaryPack }}</td>
+                                            <td class="text-right">{{ $service->MRPUnit }}</td>
+                                            <td class="text-right">{{ $service->MRPPack }}</td>
+                                            <td class="text-right">{{ $service->TP }}</td>
+                                            <td class="text-center">{{ $service->DCCNumber }}</td>
+                                            <td class="text-center">{{ $service->Availability }}</td>
+                                        </tr>
+                                    @endforeach
 
 
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
+                    @php
+                        $Year1Unit = 0;
+                        $Year1Value = 0;
+                        $Year2Unit = 0;
+                        $Year2Value = 0;
+                        $Year3Unit = 0;
+                        $Year3Value = 0;
+                    @endphp
 
                     <div class="row">
                         <h5 class="col-sm-12 mt-3">B. FORECAST</h5>
@@ -128,66 +156,113 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @foreach ($proposal->forecasts as $forecast)
-                                                <tr>
-                                                    <td >{{ $forecast->StrengthDosageForm }}</td>
-                                                    <td class="text-center">{{ $forecast->Year1Unit }}</td>
-                                                    <td class="text-right">{{ $forecast->Year1Value }}</td>
-                                                    <td class="text-center">{{ $forecast->Year2Unit }}</td>
-                                                    <td class="text-right">{{ $forecast->Year2Value }}</td>
-                                                    <td class="text-center">{{ $forecast->Year3Unit }}</td>
-                                                    <td class="text-right">{{ $forecast->Year3Value }}</td>
-                                                    <td class="text-center">{{ $forecast->LaunchingMonth }}</td>
-                                                </tr>
-                                @endforeach
+                                    @foreach ($proposal->forecasts as $forecast)
+                                        <tr>
+                                            <td>{{ $forecast->StrengthDosageForm }}</td>
+                                            <td class="text-center">{{ $forecast->Year1Unit }}</td>
+                                            <td class="text-center">{{ $forecast->Year1Value }}</td>
+                                            <td class="text-center">{{ $forecast->Year2Unit }}</td>
+                                            <td class="text-center">{{ $forecast->Year2Value }}</td>
+                                            <td class="text-center">{{ $forecast->Year3Unit }}</td>
+                                            <td class="text-center">{{ $forecast->Year3Value }}</td>
+                                            <td class="text-center">
+                                                {{ date('M, Y', strtotime($forecast->LaunchingMonth)) }}</td>
+                                        </tr>
+                                        @php
+                                            $Year1Unit += $forecast->Year1Unit;
+                                            $Year1Value += $forecast->Year1Value;
+                                            $Year2Unit += $forecast->Year2Unit;
+                                            $Year2Value += $forecast->Year2Value;
+                                            $Year3Unit += $forecast->Year3Unit;
+                                            $Year3Unit += $forecast->Year3Unit;
+                                        @endphp
+                                    @endforeach
 
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="text-center"> <b>Total</b> </td>
+                                        <td class="text-center">{{ $Year1Unit }}</td>
+                                        <td class="text-center">{{ $Year1Value }}</td>
+                                        <td class="text-center">{{ $Year2Unit }}</td>
+                                        <td class="text-center">{{ $Year2Value }}</td>
+                                        <td class="text-center">{{ $Year3Unit }}</td>
+                                        <td class="text-center">{{ $Year3Value }}</td>
+                                        <td class="text-center"></td>
+                                    </tr>
+
+                                </tfoot>
                             </table>
+
                         </div>
                     </div>
 
-                    <form action="{{ route('proposal.request_approval_store') }}" method="post" class="needs-validation mt-3" role="form" novalidate>
-                      @csrf
-                                <div class="row">
-                                <input type="hidden" name="ProposalID" value="{{ $proposal->ProposalID }}">
+                    <form action="{{ route('proposal.request_approval_store') }}" method="post"
+                        class="needs-validation mt-3" role="form" novalidate>
+                        @csrf
+                        <div class="row">
+                            <input type="hidden" name="ProposalID" value="{{ $proposal->ProposalID }}">
 
-
-                                @if (!($proposal->RecommendedBy == auth()->id()))
-                                <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Forward To<span class="bg-red"> *</span></label>
+                            @if ($UserLevel == 'Level2')
+                                <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Forward To<span
+                                        class="bg-red"> *</span></label>
                                 <div class="col-sm-4 mt-3">
                                     <select class="form-select" id="ForwardTo" name="ForwardTo" required>
-                                         <option value="" disabled selected>Select Forward To </option>
-                                         @foreach (\App\Models\User::all() as $item)
-                                             <option value="{{ $item->UserID }}"  >{{ $item->UserName }}</option>
-                                         @endforeach
-                                     </select>
-                                 </div>
-                                @else
+                                        <option value="" disabled selected>Select Forward To </option>
 
-                                <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Recommended By<span class="bg-red"> *</span></label>
+                                        @foreach ($UserList as $item)
+                                            <option value="{{ $item->UserID }}">
+                                                {{ $item->UserName . '(' . $item->UserID . ')' }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                                <div class="col-sm-4 mt-3">{{ auth()->user()->UserName }}</div>
+                            @endif
 
-                                @endif
+                            @if ($UserLevel == 'Level4')
+                                <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Recommended By<span
+                                        class="bg-red"> *</span></label>
+
+                                <div class="col-sm-4 mt-3">
+                                    {{ auth()->user()->UserName . '(' . auth()->user()->Designation . ')' }}</div>
 
                                 <div class="col-sm-6"></div>
 
-                                <label class="col-sm-2 col-form-label mt-3" for="Status">Status<span class="bg-red"> *</span></label>
+                                <label class="col-sm-2 col-form-label mt-3" for="Comment">Comment<span
+                                        class="bg-red"> *</span></label>
                                 <div class="col-sm-4 mt-3">
-                                   <select class="form-select" id="Status" name="Status" required>
-                                        <option value="Approved" >Approved</option>
-                                        <option value="Declined" >Declined</option>
-                                    </select>
+                                    <textarea name="Comment" class="form-control w-100 w-80" style="background: #ffffff;"
+                                        placeholder="Enter your comment here..."></textarea>
                                 </div>
-                                <div class="col-sm-6">
+                            @endif
 
-                                </div>
-                                </div>
-                                 <div class="row ">
-                                    <div class="col-sm-12 mt-3">
-                                        <button type="submit" class="publish-post me-1" style="background: #f0c40f; color:#000">Submit</button>
-                                    </div>
-                                </div>
+                            @if ($UserLevel == 'Level3')
+                                <label class="col-sm-2 col-form-label mt-3" for="ForwardTo">Recommended By<span
+                                        class="bg-red"> *</span></label>
+
+                                <div class="col-sm-4 mt-3">{{ auth()->user()->UserName }}</div>
+                            @endif
+
+                            <div class="col-sm-6"></div>
+
+                            <label class="col-sm-2 col-form-label mt-3" for="Status">Status<span class="bg-red">
+                                    *</span></label>
+                            <div class="col-sm-4 mt-3">
+                                <select class="form-select" id="Status" name="Status" required>
+                                    <option value="1">Approved</option>
+                                    <option value="2">Declined</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-sm-12 mt-3">
+                                <button type="submit" class="publish-post me-1"
+                                    style="background: #f0c40f; color:#000">Submit</button>
+                            </div>
+                        </div>
                     </form>
 
                 </div>
@@ -196,8 +271,4 @@
     </x-slot>
 </x-app-component>
 
-<script>
-
-
-
-</script>
+<script></script>

@@ -219,7 +219,8 @@ if (!function_exists('can_do')) {
 if (!function_exists('webiste')) {
     function webiste()
     {
-        return Website::first();
+        // return Website::first();
+        return 1;
     }
 }
 

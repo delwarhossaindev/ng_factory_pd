@@ -60,6 +60,15 @@
             $saveStatus = collect($proposal->referenceStatuses ?? [])
                 ->pluck('ReferenceStatus')
                 ->toArray();
+            $TopManagement = DB::table('ProposalApprove')->where('ProposalID', $proposal->ProposalID)->get();
+
+            $TopManagement1 = $TopManagement->where('ApprovedBy', '02032')->first() ?? null;
+            $TopManagement2 = $TopManagement->where('ApprovedBy', '11412')->first() ?? null;
+            $TopManagement3 = $TopManagement->where('ApprovedBy', '49540')->first() ?? null;
+            $TopManagement4 = $TopManagement->where('ApprovedBy', '34387')->first() ?? null;
+            $TopManagement5 = $TopManagement->where('ApprovedBy', '00925')->first() ?? null;
+            $TopManagement6 = $TopManagement->where('ApprovedBy', '01645')->first() ?? null;
+
         @endphp
         <div class="card">
             <div class="card-body">
@@ -141,6 +150,15 @@
                         </div>
                     </div>
 
+                    @php
+                        $Year1Unit = 0;
+                        $Year1Value = 0;
+                        $Year2Unit = 0;
+                        $Year2Value = 0;
+                        $Year3Unit = 0;
+                        $Year3Value = 0;
+                    @endphp
+
                     <div class="row">
                         <h5 class="col-sm-12 mt-3">B. FORECAST</h5>
                         <div class="col-sm-12 table-responsive">
@@ -172,10 +190,33 @@
                                             <td class="text-center">{{ $forecast->Year2Value }}</td>
                                             <td class="text-center">{{ $forecast->Year3Unit }}</td>
                                             <td class="text-center">{{ $forecast->Year3Value }}</td>
-                                            <td class="text-center">{{ $forecast->LaunchingMonth }}</td>
+                                            <td class="text-center">
+                                                {{ date('M, Y', strtotime($forecast->LaunchingMonth)) }}</td>
                                         </tr>
+                                        @php
+                                            $Year1Unit += $forecast->Year1Unit;
+                                            $Year1Value += $forecast->Year1Value;
+                                            $Year2Unit += $forecast->Year2Unit;
+                                            $Year2Value += $forecast->Year2Value;
+                                            $Year3Unit += $forecast->Year3Unit;
+                                            $Year3Unit += $forecast->Year3Unit;
+                                        @endphp
                                     @endforeach
+
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="text-center"> <b>Total</b> </td>
+                                        <td class="text-center">{{ $Year1Unit }}</td>
+                                        <td class="text-center">{{ $Year1Value }}</td>
+                                        <td class="text-center">{{ $Year2Unit }}</td>
+                                        <td class="text-center">{{ $Year2Value }}</td>
+                                        <td class="text-center">{{ $Year3Unit }}</td>
+                                        <td class="text-center">{{ $Year3Value }}</td>
+                                        <td class="text-center"></td>
+                                    </tr>
+
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -187,28 +228,23 @@
                                 <tbody>
                                     <tr>
                                         @foreach ([
-                                                    'Proposed by' => ['user' => $ProposedBy, 'role' => 'Marketing (Level-1)'],
-                                                    'Evaluated by' => ['user' => $EvaluatedBy, 'role' => 'Marketing (Level-2)'],
-                                                    'Recommended by' => ['user' => $RecommendedBy, 'role' => 'Marketing (Level-3)'],
-                                                ] as $title => $data)
-                                                <td>
+        'Proposed by' => ['user' => $ProposedBy, 'role' => 'Marketing (Level-1)'],
+        'Evaluated by' => ['user' => $EvaluatedBy, 'role' => 'Marketing (Level-2)'],
+        'Recommended by' => ['user' => $RecommendedBy, 'role' => 'Marketing (Level-3)'],
+    ] as $title => $data)
+                                            <td>
                                                 <div class="text-center">
-                                                    <p><strong>{{ $title }}</strong></p>
-
-                                                    @if ($data['user'] && $data['user']->SignaturePath)
-                                                    <img src="{{ asset('storage/' . $data['user']->SignaturePath) }}"
-                                                    alt="Signature"
-                                                    style="width: 120px; height: 40px; object-fit: contain;">
+                                                    <span><strong>{{ $title }}</strong></span><br>
+                                                    @if (isset($data['user']->UserName))
+                                                        <span>{{ $data['user']->UserName ?? '' }}</span><br>
+                                                        <span>{{ $data['user']->Designation ?? '' }}</span>
                                                     @else
-
-                                                    <div  style="width: 120px; height: 40px; object-fit: contain;">
-
-                                                    </div>
-
+                                                        <span>&nbsp;</span><br>
+                                                        <span>&nbsp;</span>
                                                     @endif
 
-                                                    <p class="border-bottom"
-                                                        style="width: 80%; margin: 0 auto; padding-bottom: 5px;">&nbsp;
+
+                                                    <p class="border-bottom" style="width: 80%; margin: 0 auto; ">&nbsp;
                                                     </p>
                                                     <p>{{ $data['role'] }}</p>
                                                 </div>
@@ -239,53 +275,123 @@
                                             <strong>Assistant General Manager</strong><br>
                                             <span class="department">Product Development</span>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement1 ? $TopManagement1->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement1)
+
+                                           {{  $TopManagement1->StatusID == 1 ? 'Recommended' : 'Not Recommended' }}
+
+                                           @else
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+                                            {{ $TopManagement1 && $TopManagement1->ApprovedDate ? date('Y-m-d', strtotime($TopManagement1->ApprovedDate)) : ' ' }}
+
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <strong>Director</strong><br>
                                             <span class="department">Quality Assurance</span>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement2 ? $TopManagement2->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement2)
+
+                                           {{  $TopManagement2->StatusID == 1 ? 'Recommended' : 'Not Recommended' }}
+
+                                           @else
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+                                            {{ $TopManagement1 && $TopManagement1->ApprovedDate ? date('Y-m-d', strtotime($TopManagement1->ApprovedDate)) : ' ' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <strong>Director</strong><br>
                                             <span class="department">Operations</span>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement3 ? $TopManagement3->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement3)
+
+                                           {{  $TopManagement3->StatusID == 1 ? 'Recommended' : 'Not Recommended' }}
+
+                                           @else
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+                                            {{ $TopManagement1 && $TopManagement1->ApprovedDate ? date('Y-m-d', strtotime($TopManagement1->ApprovedDate)) : ' ' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <strong>Deputy Director</strong><br>
                                             <span class="department">Supply Chain</span>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement4 ? $TopManagement4->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement4)
+
+                                           {{  $TopManagement4->StatusID == 1 ? 'Recommended' : 'Not Recommended' }}
+
+                                           @else
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+
+                                            {{ $TopManagement1 && $TopManagement1->ApprovedDate ? date('Y-m-d', strtotime($TopManagement1->ApprovedDate)) : ' ' }}
+
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <strong>Director</strong><br>
                                             <span class="department">Marketing Operations</span>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement5 ? $TopManagement5->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement5)
+
+                                           {{  $TopManagement5->StatusID == 1 ? 'Recommended' : 'Not Recommended' }}
+
+                                           @else
+
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+                                            {{ $TopManagement5 && $TopManagement5->ApprovedDate ? date('Y-m-d', strtotime($TopManagement5->ApprovedDate)) : ' ' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
                                             <strong>Chief Operating Officer</strong>
                                         </td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center">&nbsp;</td>
-                                        <td class="empty-state text-center"><img src="http://127.0.0.1:8000/storage/signatures/DALkMhEBxMWLVkS6sKN8yMleQUozKbD7Ub4MpoAY.png" alt="Signature" style="width: 120px; height: 40px; object-fit: contain;"></td>
+                                        <td class="empty-state text-center">
+                                            {{  $TopManagement6 ? $TopManagement6->Comment : ' ' }}</td>
+                                        <td class="empty-state text-center">
+                                           @if ($TopManagement6)
+
+                                           {{  $TopManagement6->StatusID == 1 ? 'Approved' : 'Not Approved' }}
+
+                                           @else
+
+                                           @endif
+                                        </td>
+                                        <td class="empty-state text-center">
+                                            {{ $TopManagement6 && $TopManagement6->ApprovedDate ? date('Y-m-d', strtotime($TopManagement6->ApprovedDate)) : ' ' }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

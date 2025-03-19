@@ -21,7 +21,10 @@ class NGFactoryPDController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = ProposalMaster::with(['referenceStatuses', 'generalInfo.details', 'forecasts']);
+            $query = ProposalMaster::with(['referenceStatuses', 'generalInfo.details', 'forecasts'])
+            ->Where('CreatedBy', auth()->user()->UserID)
+            ->orderByDesc('ProposalID') 
+            ->get();
 
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
@@ -52,9 +55,9 @@ class NGFactoryPDController extends Controller
                                <i class="tf-icons bx bxs-show"></i>
                             </a>';
 
-                    $btn .= ' <a href="' . $routeEdit . '" class="btn btn-warning btn-sm" title="Edit">
-                                <i class="tf-icons bx bxs-edit"></i>
-                              </a>';
+                    // $btn .= ' <a href="' . $routeEdit . '" class="btn btn-warning btn-sm" title="Edit">
+                    //             <i class="tf-icons bx bxs-edit"></i>
+                    //           </a>';
 
                     //         $btn .= ' <button type="button" class="btn btn-danger btn-sm delete-btn"
                     //       data-id="' . $row->ProposalID . '" title="Delete">
@@ -82,15 +85,17 @@ class NGFactoryPDController extends Controller
 
     public function store(Request $request)
     {
+
+
         DB::beginTransaction();
 
         try {
 
             $proposalMaster = ProposalMaster::create([
                 'ProductCategory' => $request->ProductCategory,
-                'PresentDesk' => $request->ForwardTo ?? auth()->id(),
+                'PresentDesk' => $request->ForwardTo ?? auth()->user()->UserID,
                 'EvaluatedBy' => $request->ForwardTo ?? null,
-                'CreatedBy' => auth()->id(),
+                'CreatedBy' => auth()->user()->UserID,
                 'CreatedDate' => now()->toDateString(),
             ]);
 
@@ -151,7 +156,7 @@ class NGFactoryPDController extends Controller
             return back()->withMessage('Data saved successfully');
         } catch (\Throwable $th) {
             DB::rollback();
-            dd($th->getMessage());
+            //dd($th->getMessage());
             return back()->withError('Error: ' . $th->getMessage());
         }
     }
@@ -165,6 +170,7 @@ class NGFactoryPDController extends Controller
         $RecommendedBy = $proposal->RecommendedBy ? User::where('UserID', $proposal->RecommendedBy)->first() : NULL;
 
 
+
         return view('admin.proposal.show', compact('proposal', 'ProposedBy', 'EvaluatedBy', 'RecommendedBy'));
     }
 
@@ -175,7 +181,7 @@ class NGFactoryPDController extends Controller
         return view('admin.proposal.request_approval_show', compact('proposal'));
     }
 
-    public function requestForApprovalStore(Request $request)
+    public function requestForApprovalStoreOld(Request $request)
     {
 
 
@@ -190,7 +196,7 @@ class NGFactoryPDController extends Controller
 
 
             if ($status == 'Approved') {
-                if ($proposalMaster->RecommendedBy == auth()->id()) {
+                if ($proposalMaster->RecommendedBy == auth()->user()->UserID) {
                     $proposalMaster->update([
 
                         'RecommendedStatus' => $status,
@@ -198,9 +204,9 @@ class NGFactoryPDController extends Controller
                     ]);
                 }
 
-                if ($proposalMaster->EvaluatedBy == auth()->id()) {
+                if ($proposalMaster->EvaluatedBy == auth()->user()->UserID) {
                     $proposalMaster->update([
-                        'PresentDesk' => $request->ForwardTo ?? auth()->id(),
+                        'PresentDesk' => $request->ForwardTo ?? auth()->user()->UserID,
                         'EvaluatedStatus' => $status,
                         'RecommendedBy' => $request->ForwardTo ?? null,
                     ]);
@@ -209,9 +215,9 @@ class NGFactoryPDController extends Controller
 
             if ($status == 'Declined') {
 
-                if ($proposalMaster->EvaluatedBy == auth()->id()) {
+                if ($proposalMaster->EvaluatedBy == auth()->user()->UserID) {
                     $proposalMaster->update([
-                        'PresentDesk' => $proposalMaster->CreatedBy ?? auth()->id(),
+                        'PresentDesk' => $proposalMaster->CreatedBy ?? auth()->user()->UserID,
                         'RecommendedBy' => null,
                         'EvaluatedBy' => null,
                         'EvaluatedStatus' => $status,
@@ -220,13 +226,112 @@ class NGFactoryPDController extends Controller
                     ]);
                 }
 
-                if ($proposalMaster->RecommendedBy == auth()->id()) {
+                if ($proposalMaster->RecommendedBy == auth()->user()->UserID) {
                     $proposalMaster->update([
-                        'PresentDesk' => $proposalMaster->CreatedBy ?? auth()->id(),
+                        'PresentDesk' => $proposalMaster->CreatedBy ?? auth()->user()->UserID,
                         'RecommendedBy' => null,
                         'EvaluatedBy' => null,
                         'RecommendedStatus' => $status,
                         'StatusID' => 2,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('proposal.request_approval_list')->with('message', 'Data updated successfully');
+        } catch (\Throwable $th) {
+            DB::rollback();
+            dd($th->getMessage());
+            return back()->withError('Error: ' . $th->getMessage());
+        }
+    }
+
+    public function requestForApprovalStore(Request $request)
+    {
+
+        DB::beginTransaction();
+
+        try {
+
+            $currentUserID = auth()->user()->UserID;
+            $UserLevel = auth()->user()->UserLevel;
+            $status = $request->Status;
+            $proposalMaster = ProposalMaster::findOrFail($request->ProposalID);
+
+            if ($UserLevel == 'Level2') {
+                $ApprovedType = 'EvaluatedBy';
+                $supervisorID = $request->ForwardTo;
+            }
+            if ($UserLevel == 'Level3') {
+                $ApprovedType = 'RecommendedBy';
+                $supervisor = DB::table('Supervisor')
+                    ->where('UserID', $currentUserID)
+                    ->select('SupervisorID')
+                    ->first();
+
+                $supervisorID = $supervisor->SupervisorID ?? null;
+            }
+            if ($UserLevel == 'Level4') {
+                $ApprovedType = 'TopManagement';
+                $supervisor = DB::table('Supervisor')
+                    ->where('UserID', $currentUserID)
+                    ->select('SupervisorID')
+                    ->first();
+
+                $supervisorID = $currentUserID != '01645' ? $supervisor->SupervisorID : $proposalMaster->CreatedBy;
+            }
+
+            if ($status == '1') {
+
+                DB::table('ProposalApprove')->insert(
+                    [
+                        'ProposalID' => $request->ProposalID,
+                        'ApprovedBy' => $currentUserID,
+                        'ApprovedDate' => now(),
+                        'Comment' => $request->Comment ?? '',
+                        'ApprovedType' => $ApprovedType,
+                        'StatusID' => $status,
+                    ]
+                );
+
+                if ($UserLevel == 'Level4') {
+
+                    $proposalMaster->update([
+                        'PresentDesk' => $supervisorID,
+                    ]);
+                }
+
+                if ($UserLevel == 'Level2') {
+                    $proposalMaster->update([
+                        'PresentDesk' => $supervisorID,
+                        'RecommendedBy' => $supervisorID,
+                        'EvaluatedStatus' => $status,
+                        'StatusID' => 1,
+                    ]);
+                }
+                if ($UserLevel == 'Level3') {
+                    $proposalMaster->update([
+                        'PresentDesk' => $supervisorID,
+                        'RecommendedStatus' => $status,
+                        'StatusID' => 1,
+                    ]);
+                }
+            }
+            else {
+                if ($UserLevel == 'Level2') {
+                    $proposalMaster->update([
+                        'PresentDesk' => $proposalMaster->CreatedBy,
+                        'EvaluatedStatus' => NULL,
+                        'StatusID' => NULL,
+                    ]);
+                }
+                if ($UserLevel == 'Level3') {
+                    $proposalMaster->update([
+                        'PresentDesk' => $proposalMaster->CreatedBy,
+                        'EvaluatedStatus' => NULL,
+                        'RecommendedStatus' => NULL,
+                        'StatusID' => NULL,
                     ]);
                 }
             }
@@ -257,7 +362,7 @@ class NGFactoryPDController extends Controller
             $proposalMaster->update([
                 'ProductCategory' => $request->ProductCategory,
                 'EvaluatedBy' => $request->ForwardTo ?? null,
-                'EditedBy' => auth()->id(),
+                'EditedBy' => auth()->user()->UserID,
                 'EditedDate' => now()->toDateString(),
             ]);
 
@@ -355,12 +460,8 @@ class NGFactoryPDController extends Controller
                 'referenceStatuses',
                 'generalInfo.details',
                 'forecasts'
-            ])->where('PresentDesk', auth()->id());
-            // ->where(function ($q) {
-            //     $q->where('PresentDesk', auth()->id())
-            //       ->orWhere('EvaluatedBy', auth()->id())
-            //       ->orWhere('RecommendedBy', auth()->id());
-            // });
+            ])
+            ->where('PresentDesk', auth()->user()->UserID);
 
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
@@ -397,5 +498,59 @@ class NGFactoryPDController extends Controller
         }
 
         return view('admin.proposal.request_for_approval');
+    }
+
+    public function approved_submission_list(Request $request)
+    {
+        if ($request->ajax()) {
+            $query = ProposalMaster::where('PresentDesk', auth()->user()->UserID)
+            ->Where('CreatedBy', auth()->user()->UserID)
+            ->orderByDesc('ProposalID') // Ordering should come after filtering
+            ->get();
+            return DataTables::of($query)
+                ->addColumn('ProductCategory', function ($row) {
+                    return $row->ProductCategory ?? '-';
+                })
+                ->addColumn('GenericName', function ($row) {
+
+                    return $row->generalInfo->GenericName ?? '-';
+                })
+                ->addColumn('TherapeuticClass', function ($row) {
+                    return $row->generalInfo->TherapeuticClass ?? '-';
+                })
+                ->addColumn('Indication', function ($row) {
+                    return $row->generalInfo->Indication ?? '-';
+                })
+                ->addColumn('LocalCompetitors', function ($row) {
+                    return $row->generalInfo->LocalCompetitors ?? '-';
+                })
+                ->addColumn('OriginatorBrand', function ($row) {
+                    return $row->generalInfo->OriginatorBrand ?? '-';
+                })
+                ->addColumn('action', function ($row) {
+                    $routeShow = route('ng_factory_pd.show', $row->ProposalID);
+                    $routeEdit = route('ng_factory_pd.edit', $row->ProposalID);
+                    $routeDelete = route('ng_factory_pd.destroy', $row->ProposalID);
+
+                    $btn = '<a href="' . $routeShow . '" class="btn btn-primary btn-sm" title="View">
+                               <i class="tf-icons bx bxs-show"></i>
+                            </a>';
+
+                    // $btn .= ' <a href="' . $routeEdit . '" class="btn btn-warning btn-sm" title="Edit">
+                    //             <i class="tf-icons bx bxs-edit"></i>
+                    //           </a>';
+
+                    //         $btn .= ' <button type="button" class="btn btn-danger btn-sm delete-btn"
+                    //       data-id="' . $row->ProposalID . '" title="Delete">
+                    //       <i class="tf-icons bx bxs-trash"></i>
+                    //   </button>';
+
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('admin.proposal.request_for_approval_list');
     }
 }
