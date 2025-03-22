@@ -14,16 +14,22 @@
             input.form-control {
                 background: #f8f9fa;
             }
+
+            .input-group,
+            .w-80,
+            input.form-control {
+                width: 100%;
+            }
         </style>
     </x-slot>
     @php
-            $UserLevel = auth()->user()->UserLevel;
-            $UserID = auth()->user()->UserID;
-            $UserList = DB::table('Supervisor as s')
-                ->leftJoin('UserManager as um', 's.SupervisorID', '=', 'um.UserID')
-                ->where('s.UserID', $UserID)
-                ->select('s.SupervisorID', 'um.UserID', 'um.UserName', 'um.Designation')
-                ->get();
+        $UserLevel = auth()->user()->UserLevel;
+        $UserID = auth()->user()->UserID;
+        $UserList = DB::table('Supervisor as s')
+            ->leftJoin('UserManager as um', 's.SupervisorID', '=', 'um.UserID')
+            ->where('s.UserID', $UserID)
+            ->select('s.SupervisorID', 'um.UserID', 'um.UserName', 'um.Designation')
+            ->get();
     @endphp
     <x-slot name="content">
         <x-breadcrumb.breadcrumb-component firstLabel='Dashboard' firstLabelRoute='dashboard' secondLable='Proposal'
@@ -157,15 +163,15 @@
                                         </colgroup>
                                         <thead>
                                             <tr style="background: #e9ecef;">
-                                                <th class="text-center">Strength & Dosage Form</th>
-                                                <th class="text-center">Pack <br> Size</th>
-                                                <th class="text-center">Primary Pack</th>
-                                                <th class="text-center">IP or MRP <br>/Unit (Tk.)</th>
-                                                <th class="text-center">IP or MRP <br>/Pack (Tk.)</th>
-                                                <th class="text-center">TP/Pack<br>(Tk.)</th>
-                                                <th class="text-center">DCC <br> Number</th>
-                                                <th class="text-center">Availability in <br> BD</th>
-                                                <th class="text-center">Action</th>
+                                                <th style="text-align: center;">Strength & Dosage Form</th>
+                                                <th style="text-align: center;">Pack <br> Size</th>
+                                                <th style="text-align: center;">Primary Pack</th>
+                                                <th style="text-align: center;">IP or MRP <br>/Unit (Tk.)</th>
+                                                <th style="text-align: center;">IP or MRP <br>/Pack (Tk.)</th>
+                                                <th style="text-align: center;">TP/Pack<br>(Tk.)</th>
+                                                <th style="text-align: center;">DCC <br> Number</th>
+                                                <th style="text-align: center;">Availability in <br> BD</th>
+                                                <th style="text-align: center;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody id="services"></tbody>
@@ -181,47 +187,49 @@
                                     <table class="table table-sm table-bordered table-striped "
                                         style="width: 100%; table-layout: fixed;">
                                         <colgroup>
-                                            <col style="width: 15%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
-                                            <col style="width: 10%;">
+                                            <col style="width: 18%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 9%;">
+                                            <col style="width: 13%;">
                                             <col style="width: 5%;">
                                         </colgroup>
                                         <thead>
                                             <tr style="background: #e9ecef;">
-                                                <th rowspan="2" class="text-center">Strength & Dosage Form</th>
-                                                <th colspan="2" class="text-center">Year-1</th>
-                                                <th colspan="2" class="text-center">Year-2</th>
-                                                <th colspan="2" class="text-center">Year-3</th>
-                                                <th rowspan="2" class="text-center">Launching <br> Month</th>
-                                                <th rowspan="2" class="text-center">Action</th>
+                                                <th rowspan="2" style="text-align: center;">Strength & Dosage Form
+                                                </th>
+                                                <th colspan="2" style="text-align: center;">Year-1</th>
+                                                <th colspan="2" style="text-align: center;">Year-2</th>
+                                                <th colspan="2" style="text-align: center;">Year-3</th>
+                                                <th rowspan="2" style="text-align: center;">Launching <br> Month
+                                                </th>
+                                                <th rowspan="2" style="text-align: center;">Action</th>
                                             </tr>
                                             <tr style="background: #e9ecef;">
-                                                <th class="text-center">Unit</th>
-                                                <th class="text-center">Value (M)</th>
-                                                <th class="text-center">Unit</th>
-                                                <th class="text-center">Value (M)</th>
-                                                <th class="text-center">Unit</th>
-                                                <th class="text-center">Value (M)</th>
+                                                <th style="text-align: center;">Unit</th>
+                                                <th style="text-align: center;">Value (M)</th>
+                                                <th style="text-align: center;">Unit</th>
+                                                <th style="text-align: center;">Value (M)</th>
+                                                <th style="text-align: center;">Unit</th>
+                                                <th style="text-align: center;">Value (M)</th>
                                             </tr>
 
                                         </thead>
                                         <tbody id="services2"></tbody>
                                         <tfoot>
                                             <tr>
-                                                <td class="text-center"> <b>Total</b> </td>
-                                                <td class="text-center" id="year1UnitTotal"></td>
-                                                <td class="text-center" id="year1ValueTotal"></td>
-                                                <td class="text-center" id="year2UnitTotal"></td>
-                                                <td class="text-center" id="year2ValueTotal"></td>
-                                                <td class="text-center" id="year3UnitTotal"></td>
-                                                <td class="text-center" id="year3ValueTotal"></td>
-                                                <td class="text-center"></td>
-                                                <td class="text-center"></td>
+                                                <td style="text-align: center;"> <b>Total</b> </td>
+                                                <td style="text-align: center;" id="year1UnitTotal"></td>
+                                                <td style="text-align: center;" id="year1ValueTotal"></td>
+                                                <td style="text-align: center;" id="year2UnitTotal"></td>
+                                                <td style="text-align: center;" id="year2ValueTotal"></td>
+                                                <td style="text-align: center;" id="year3UnitTotal"></td>
+                                                <td style="text-align: center;" id="year3ValueTotal"></td>
+                                                <td style="text-align: center;"></td>
+                                                <td style="text-align: center;"></td>
                                             </tr>
 
                                         </tfoot>
@@ -238,8 +246,8 @@
                                         <select class="form-select" id="ForwardTo" name="ForwardTo" required>
                                             <option value="" disabled selected>Select Forward To </option>
                                             @foreach ($UserList as $item)
-                                            <option value="{{ $item->UserID }}">
-                                                {{ $item->UserName . '(' . $item->UserID . ')' }}</option>
+                                                <option value="{{ $item->UserID }}">
+                                                    {{ $item->UserName . '(' . $item->UserID . ')' }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -273,16 +281,16 @@
                 $("#addRow").click(function(event) {
                     event.preventDefault();
                     var newRow = `<tr>
-                        <td><input type="text" class="form-control" name="ServicesOneStrength[]"></td>
-                        <td><input type="text" class="form-control" name="PackSize[]"></td>
-                        <td><input type="text" class="form-control" name="PrimaryPack[]"></td>
-                        <td><input type="number" class="form-control" name="MRPUnit[]"></td>
-                        <td><input type="number" class="form-control" name="MRPPack[]"></td>
-                        <td><input type="number" class="form-control" name="TP[]"></td>
-                        <td><input type="text" class="form-control" name="DCCNumber[]"></td>
-                        <td><input type="text" class="form-control" name="Availability[]"></td>
-                        <td><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
-                    </tr>`;
+                            <td><input type="text" class="form-control " name="ServicesOneStrength[]" required></td>
+                            <td><input type="text" class="form-control text-center" name="PackSize[]" required></td>
+                            <td><input type="text" class="form-control text-center" name="PrimaryPack[]" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPUnit[]" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPPack[]" required></td>
+                            <td><input type="number" class="form-control text-center" name="TP[]" required></td>
+                            <td><input type="text" class="form-control text-center" name="DCCNumber[]" required></td>
+                            <td><input type="text" class="form-control text-center" name="Availability[]" required></td>
+                            <td style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
+                        </tr>`;
                     $("#services").append(newRow);
                 });
 
@@ -295,15 +303,15 @@
                 $("#addRow2").click(function(event) {
                     event.preventDefault();
                     var newRow = `<tr>
-                        <td><input type="text" class="form-control" name="ServicesTwoStrength[]"></td>
-                        <td><input type="number" class="form-control" name="Year1Unit[]"></td>
-                        <td><input type="number" class="form-control" name="Year1Value[]"></td>
-                        <td><input type="number" class="form-control" name="Year2Unit[]"></td>
-                        <td><input type="number" class="form-control" name="Year2Value[]"></td>
-                        <td><input type="number" class="form-control" name="Year3Unit[]"></td>
-                        <td><input type="number" class="form-control" name="Year3Value[]"></td>
-                        <td><input type="Month" class="form-control" name="LaunchingMonth[]"></td>
-                        <td><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
+                        <td ><input type="text" class="form-control" name="ServicesTwoStrength[]" ></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Unit[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Value[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Unit[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Value[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Unit[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Value[]" required></td>
+                        <td ><input type="Month" class="form-control text-center" name="LaunchingMonth[]" required></td>
+                        <td style="text-align: center;" ><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
                     </tr>`;
                     $("#services2").append(newRow);
                     calculateTotals();
@@ -340,15 +348,15 @@
 
                         if (!exists) {
                             var newRow = `<tr>
-                            <td><input type="text" class="form-control" name="ServicesTwoStrength[]" value="${strength}"></td>
-                            <td><input type="number" class="form-control" name="Year1Unit[]"></td>
-                            <td><input type="number" class="form-control" name="Year1Value[]"></td>
-                            <td><input type="number" class="form-control" name="Year2Unit[]"></td>
-                            <td><input type="number" class="form-control" name="Year2Value[]"></td>
-                            <td><input type="number" class="form-control" name="Year3Unit[]"></td>
-                            <td><input type="number" class="form-control" name="Year3Value[]"></td>
-                            <td><input type="month" class="form-control" name="LaunchingMonth[]"></td>
-                            <td><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
+                            <td ><input type="text" class="form-control" name="ServicesTwoStrength[]" value="${strength}"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year1Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year1Value[]"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year2Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year2Value[]"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year3Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" name="Year3Value[]"></td>
+                            <td ><input type="month" class="form-control text-center" name="LaunchingMonth[]"></td>
+                            <td  style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
                         </tr>`;
                             $("#services2").append(newRow);
                         }

@@ -9,6 +9,8 @@ use Auth;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificationMail;
 
 class NGFactoryPDController extends Controller
 {
@@ -55,9 +57,9 @@ class NGFactoryPDController extends Controller
                                <i class="tf-icons bx bxs-show"></i>
                             </a>';
 
-                    // $btn .= ' <a href="' . $routeEdit . '" class="btn btn-warning btn-sm" title="Edit">
-                    //             <i class="tf-icons bx bxs-edit"></i>
-                    //           </a>';
+                    $btn .= ' <a href="' . $routeEdit . '" class="btn btn-warning btn-sm" title="Edit">
+                                <i class="tf-icons bx bxs-edit"></i>
+                              </a>';
 
                     //         $btn .= ' <button type="button" class="btn btn-danger btn-sm delete-btn"
                     //       data-id="' . $row->ProposalID . '" title="Delete">
@@ -149,6 +151,15 @@ class NGFactoryPDController extends Controller
                 }
             }
 
+            $mailData = [
+            'title' => 'Proposal Approval Request',
+            'body' => 'This is for testing email using smtp.',
+            'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
+           ];
+
+           User::where('UserID', $request->ForwardTo)->get()->each(function ($user) use ($mailData) {
+               Mail::to($user->Email)->send(new NotificationMail($mailData));
+           });
 
 
             DB::commit();
@@ -336,6 +347,22 @@ class NGFactoryPDController extends Controller
                 }
             }
 
+            if( $currentUserID != '01645'){
+
+                $mailData = [
+                    'title' => 'Proposal Approval Request',
+                    'body' => 'This is for testing email using smtp.',
+                    'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
+                   ];
+
+                   User::where('UserID', $supervisorID)->get()->each(function ($user) use ($mailData) {
+                       Mail::to($user->Email)->send(new NotificationMail($mailData));
+                   });
+
+            }
+
+
+
             DB::commit();
 
             return redirect()->route('proposal.request_approval_list')->with('message', 'Data updated successfully');
@@ -358,7 +385,21 @@ class NGFactoryPDController extends Controller
         DB::beginTransaction();
 
         try {
+            // Fetch ProposalMaster or fail
             $proposalMaster = ProposalMaster::findOrFail($id);
+
+            // Delete Old Reference Statuses
+            $proposalMaster->referenceStatuses()->delete();
+
+            // Delete Old General Info Details
+            if ($proposalMaster->generalInfo) {
+                $proposalMaster->generalInfo->details()->delete();
+            }
+
+            // Delete Old Forecasts
+            $proposalMaster->forecasts()->delete();
+
+            // Update ProposalMaster
             $proposalMaster->update([
                 'ProductCategory' => $request->ProductCategory,
                 'EvaluatedBy' => $request->ForwardTo ?? null,
@@ -366,64 +407,73 @@ class NGFactoryPDController extends Controller
                 'EditedDate' => now()->toDateString(),
             ]);
 
-            foreach ($request->ReferenceStatus as $key => $value) {
-                $proposalMaster->referenceStatuses[$key]->update([
-                    'ReferenceStatus' => $value,
+            // Insert New Reference Statuses
+            if (!empty($request->ReferenceStatus)) {
+                foreach ($request->ReferenceStatus as $value) {
+                    $proposalMaster->referenceStatuses()->create([
+                        'ReferenceStatus' => $value,
+                    ]);
+                }
+            }
+
+            // Insert New General Info
+            if ($proposalMaster->generalInfo) {
+                $proposalMaster->generalInfo->update([
+                    'GenericName' => $request->GenericName ?? '',
+                    'TherapeuticClass' => $request->TherapeuticClass ?? '',
+                    'Indication' => $request->Indication ?? '',
+                    'LocalCompetitors' => $request->LocalCompetitors ?? '',
+                    'OriginatorBrand' => $request->OriginatorBrand ?? '',
                 ]);
+
+                // Insert New General Info Details
+                if (!empty($request->ServicesOneStrength)) {
+                    foreach ($request->ServicesOneStrength as $key => $value) {
+                        $proposalMaster->generalInfo->details()->create([
+                            'ProposalID' => $id,
+                            'StrengthDosageForm' => $value,
+                            'PackSize' => $request->PackSize[$key] ?? null,
+                            'PrimaryPack' => $request->PrimaryPack[$key] ?? null,
+                            'MRPUnit' => $request->MRPUnit[$key] ?? null,
+                            'MRPPack' => $request->MRPPack[$key] ?? null,
+                            'TP' => $request->TP[$key] ?? null,
+                            'DCCNumber' => $request->DCCNumber[$key] ?? null,
+                            'Availability' => $request->Availability[$key] ?? null,
+                        ]);
+                    }
+                }
             }
 
-            $proposalGeneralInfo = $proposalMaster->generalInfo;
-            $proposalGeneralInfo->update([
-                'GenericName' => $request->GenericName ?? '',
-                'TherapeuticClass' => $request->TherapeuticClass ?? '',
-                'Indication' => $request->Indication ?? '',
-                'LocalCompetitors' => $request->LocalCompetitors ?? '',
-                'OriginatorBrand' => $request->OriginatorBrand ?? '',
-            ]);
-
-            foreach ($request->ServicesOneStrength as $key => $value) {
-                $proposalGeneralInfo->details()->updateOrCreate(
-                    ['GeneralInfoDetailsID' => $proposalGeneralInfo->details[$key]->GeneralInfoDetailsID ?? null],
-                    [
+            // Insert New Forecasts
+            if (!empty($request->ServicesTwoStrength)) {
+                foreach ($request->ServicesTwoStrength as $key => $value) {
+                    $proposalMaster->forecasts()->create([
                         'ProposalID' => $id,
                         'StrengthDosageForm' => $value,
-                        'PackSize' => $request->PackSize[$key],
-                        'PrimaryPack' => $request->PrimaryPack[$key],
-                        'MRPUnit' => $request->MRPUnit[$key],
-                        'MRPPack' => $request->MRPPack[$key],
-                        'TP' => $request->TP[$key],
-                        'DCCNumber' => $request->DCCNumber[$key],
-                        'Availability' => $request->Availability[$key],
-                    ]
-                );
-            }
-
-            foreach ($request->ServicesTwoStrength as $key => $value) {
-                $proposalMaster->forecasts()->updateOrCreate(
-                    ['ForecastID' => $proposalMaster->forecasts[$key]->ForecastID ?? null],
-                    [
-                        'ProposalID' => $id,
-                        'StrengthDosageForm' => $value,
-                        'Year1Unit' => $request->Year1Unit[$key],
-                        'Year1Value' => $request->Year1Value[$key],
-                        'Year2Unit' => $request->Year2Unit[$key],
-                        'Year2Value' => $request->Year2Value[$key],
-                        'Year3Unit' => $request->Year3Unit[$key],
-                        'Year3Value' => $request->Year3Value[$key],
-                        'LaunchingMonth' => $request->LaunchingMonth[$key],
-                    ]
-                );
+                        'Year1Unit' => $request->Year1Unit[$key] ?? null,
+                        'Year1Value' => $request->Year1Value[$key] ?? null,
+                        'Year2Unit' => $request->Year2Unit[$key] ?? null,
+                        'Year2Value' => $request->Year2Value[$key] ?? null,
+                        'Year3Unit' => $request->Year3Unit[$key] ?? null,
+                        'Year3Value' => $request->Year3Value[$key] ?? null,
+                        'LaunchingMonth' => $request->LaunchingMonth[$key] ?? null,
+                    ]);
+                }
             }
 
             DB::commit();
 
-            return back()->withMessage('Data updated successfully');
+            return back()->with('message', 'Data updated successfully');
         } catch (\Throwable $th) {
             DB::rollback();
-            dd($th->getMessage());
-            return back()->withError('Error: ' . $th->getMessage());
+
+            // Log error instead of using dd()
+            Log::error('Update failed: ' . $th->getMessage());
+
+            return back()->with('error', 'Error: ' . $th->getMessage());
         }
     }
+
 
     public function destroy($id)
     {
