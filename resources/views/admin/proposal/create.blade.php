@@ -284,9 +284,9 @@
                             <td><input type="text" class="form-control " name="ServicesOneStrength[]" required></td>
                             <td><input type="text" class="form-control text-center" name="PackSize[]" required></td>
                             <td><input type="text" class="form-control text-center" name="PrimaryPack[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="MRPUnit[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="MRPPack[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="TP[]" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPUnit[]" step="0.01" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPPack[]" step="0.01" required></td>
+                            <td><input type="number" class="form-control text-center" name="TP[]" step="0.01" required></td>
                             <td><input type="text" class="form-control text-center" name="DCCNumber[]" required></td>
                             <td><input type="text" class="form-control text-center" name="Availability[]" required></td>
                             <td style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
@@ -304,12 +304,12 @@
                     event.preventDefault();
                     var newRow = `<tr>
                         <td ><input type="text" class="form-control" name="ServicesTwoStrength[]" ></td>
-                        <td ><input type="number" class="form-control text-center" name="Year1Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year1Value[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year2Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year2Value[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year3Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year3Value[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Value[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Value[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Value[]" step="0.01" required></td>
                         <td ><input type="Month" class="form-control text-center" name="LaunchingMonth[]" required></td>
                         <td style="text-align: center;" ><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
                     </tr>`;
@@ -349,12 +349,12 @@
                         if (!exists) {
                             var newRow = `<tr>
                             <td ><input type="text" class="form-control" name="ServicesTwoStrength[]" value="${strength}"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year1Unit[]"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year1Value[]"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year2Unit[]"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year2Value[]"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year3Unit[]"></td>
-                            <td ><input type="number" class="form-control text-center" name="Year3Value[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year1Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year1Value[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year2Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year2Value[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year3Unit[]"></td>
+                            <td ><input type="number" class="form-control text-center" step="0.01" name="Year3Value[]"></td>
                             <td ><input type="month" class="form-control text-center" name="LaunchingMonth[]"></td>
                             <td  style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
                         </tr>`;

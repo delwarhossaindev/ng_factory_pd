@@ -152,9 +152,9 @@
                                                     <td><input type="text" class="form-control " name="ServicesOneStrength[]" value="{{ $service->StrengthDosageForm }}" required></td>
                                                     <td><input type="text" class="form-control text-center" name="PackSize[]" value="{{ $service->PackSize }}"></td>
                                                     <td><input type="text" class="form-control text-center" name="PrimaryPack[]" value="{{ $service->PrimaryPack }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="MRPUnit[]" value="{{ $service->MRPUnit }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="MRPPack[]" value="{{ $service->MRPPack }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="TP[]" value="{{ $service->TP }}"></td>
+                                                    <td><input type="number" class="form-control text-center" name="MRPUnit[]" value="{{ $service->MRPUnit }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="MRPPack[]" value="{{ $service->MRPPack }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="TP[]" value="{{ $service->TP }}" step="0.01"></td>
                                                     <td><input type="text" class="form-control text-center" name="DCCNumber[]" value="{{ $service->DCCNumber }}"></td>
                                                     <td><input type="text" class="form-control text-center" name="Availability[]" value="{{ $service->Availability }}"></td>
                                                     <td  style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
@@ -209,12 +209,12 @@
                                             @foreach ($proposal->forecasts as $forecast)
                                                 <tr>
                                                     <td><input type="text" class="form-control" name="ServicesTwoStrength[]" value="{{ $forecast->StrengthDosageForm }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year1Unit[]" value="{{ $forecast->Year1Unit }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year1Value[]" value="{{ $forecast->Year1Value }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year2Unit[]" value="{{ $forecast->Year2Unit }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year2Value[]" value="{{ $forecast->Year2Value }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year3Unit[]" value="{{ $forecast->Year3Unit }}"></td>
-                                                    <td><input type="number" class="form-control text-center" name="Year3Value[]" value="{{ $forecast->Year3Value }}"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year1Unit[]" value="{{ $forecast->Year1Unit }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year1Value[]" value="{{ $forecast->Year1Value }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year2Unit[]" value="{{ $forecast->Year2Unit }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year2Value[]" value="{{ $forecast->Year2Value }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year3Unit[]" value="{{ $forecast->Year3Unit }}" step="0.01"></td>
+                                                    <td><input type="number" class="form-control text-center" name="Year3Value[]" value="{{ $forecast->Year3Value }}" step="0.01"></td>
                                                     <td><input type="month" class="form-control text-center" name="LaunchingMonth[]" value="{{ $forecast->LaunchingMonth }}"></td>
                                                     <td  style="text-align: center;"><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
                                                 </tr>
@@ -276,9 +276,9 @@
                           <td><input type="text" class="form-control " name="ServicesOneStrength[]" required></td>
                             <td><input type="text" class="form-control text-center" name="PackSize[]" required></td>
                             <td><input type="text" class="form-control text-center" name="PrimaryPack[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="MRPUnit[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="MRPPack[]" required></td>
-                            <td><input type="number" class="form-control text-center" name="TP[]" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPUnit[]" step="0.01" required></td>
+                            <td><input type="number" class="form-control text-center" name="MRPPack[]" step="0.01" required></td>
+                            <td><input type="number" class="form-control text-center" name="TP[]" step="0.01" required></td>
                             <td><input type="text" class="form-control text-center" name="DCCNumber[]" required></td>
                             <td><input type="text" class="form-control text-center" name="Availability[]" required></td>
                         <td style="text-align: center;" ><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
@@ -293,12 +293,12 @@
                     event.preventDefault();
                     var newRow = `<tr>
                       <td ><input type="text" class="form-control" name="ServicesTwoStrength[]" ></td>
-                        <td ><input type="number" class="form-control text-center" name="Year1Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year1Value[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year2Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year2Value[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year3Unit[]" required></td>
-                        <td ><input type="number" class="form-control text-center" name="Year3Value[]" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year1Value[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year2Value[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Unit[]" step="0.01" required></td>
+                        <td ><input type="number" class="form-control text-center" name="Year3Value[]" step="0.01" required></td>
                         <td ><input type="Month" class="form-control text-center" name="LaunchingMonth[]" required></td>
                         <td style="text-align: center;" ><button type="button" class="btn btn-danger btn-sm removeRow2">X</button></td>
                     </tr>`;

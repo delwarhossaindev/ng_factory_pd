@@ -24,9 +24,9 @@ class NGFactoryPDController extends Controller
     {
         if ($request->ajax()) {
             $query = ProposalMaster::with(['referenceStatuses', 'generalInfo.details', 'forecasts'])
-            ->Where('CreatedBy', auth()->user()->UserID)
-            ->orderByDesc('ProposalID')
-            ->get();
+                ->Where('CreatedBy', auth()->user()->UserID)
+                ->orderByDesc('ProposalID')
+                ->get();
 
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
@@ -152,14 +152,14 @@ class NGFactoryPDController extends Controller
             }
 
             $mailData = [
-            'title' => 'Proposal Approval Request',
-            'body' => 'This is for testing email using smtp.',
-            'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
-           ];
+                'title' => 'Proposal Approval Request',
+                'body' => 'This is for testing email using smtp.',
+                'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
+            ];
 
-           User::where('UserID', $request->ForwardTo)->get()->each(function ($user) use ($mailData) {
-               Mail::to($user->Email)->send(new NotificationMail($mailData));
-           });
+            User::where('UserID', $request->ForwardTo)->get()->each(function ($user) use ($mailData) {
+                Mail::to($user->Email)->send(new NotificationMail($mailData));
+            });
 
 
             DB::commit();
@@ -180,7 +180,28 @@ class NGFactoryPDController extends Controller
         $EvaluatedBy = $proposal->EvaluatedBy ? User::where('UserID', $proposal->EvaluatedBy)->first() : NULL;
         $RecommendedBy = $proposal->RecommendedBy ? User::where('UserID', $proposal->RecommendedBy)->first() : NULL;
 
+        $EvaluatedProposalApprove = DB::table('ProposalApprove')
+            ->where('ProposalID', $id)
+            ->where('ApprovedBy', $proposal->EvaluatedBy)
+            ->where('StatusID', 1)
+            ->orderByDesc('ApprovedDate')
+            ->first();
 
+        $RecommendedProposalApprove = DB::table('ProposalApprove')
+            ->where('ProposalID', $id)
+            ->where('ApprovedBy', $proposal->RecommendedBy)
+            ->where('StatusID', 1)
+            ->orderByDesc('ApprovedDate')
+            ->first();
+
+
+
+
+        $ProposedBy->SignatureDate = $proposal->CreatedDate ? date('d-m-Y', strtotime($proposal->CreatedDate)) : NULL;
+
+        $EvaluatedBy->SignatureDate = $EvaluatedProposalApprove ? date('d-m-Y', strtotime($EvaluatedProposalApprove->ApprovedDate)) : NULL;
+
+        $RecommendedBy->SignatureDate = $RecommendedProposalApprove ? date('d-m-Y', strtotime($RecommendedProposalApprove->ApprovedDate)) : NULL;
 
         return view('admin.proposal.show', compact('proposal', 'ProposedBy', 'EvaluatedBy', 'RecommendedBy'));
     }
@@ -200,8 +221,6 @@ class NGFactoryPDController extends Controller
 
         try {
 
-
-
             $status = $request->Status;
             $proposalMaster = ProposalMaster::findOrFail($request->ProposalID);
 
@@ -209,7 +228,6 @@ class NGFactoryPDController extends Controller
             if ($status == 'Approved') {
                 if ($proposalMaster->RecommendedBy == auth()->user()->UserID) {
                     $proposalMaster->update([
-
                         'RecommendedStatus' => $status,
                         'StatusID' => 1,
                     ]);
@@ -233,7 +251,6 @@ class NGFactoryPDController extends Controller
                         'EvaluatedBy' => null,
                         'EvaluatedStatus' => $status,
                         'StatusID' => 2,
-
                     ]);
                 }
 
@@ -327,9 +344,48 @@ class NGFactoryPDController extends Controller
                         'RecommendedStatus' => $status,
                         'StatusID' => 1,
                     ]);
+
+                    $mailData = [
+                        'title' => 'Proposal Approval Request',
+                        'body' => 'This is for testing email using smtp.',
+                        'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
+                    ];
+
+                    $additionalMail = [
+                        'raihana@aci-bd.com',
+                        'jasmin@aci-bd.com',
+                        'joyanta@aci-bd.com',
+                    ];
+
+                    foreach ($additionalMail as $email) {
+                        Mail::to($email)->send(new NotificationMail($mailData));
+                    }
                 }
-            }
-            else {
+
+                $mailData = [
+                    'title' => 'Proposal Approval Request',
+                    'body' => 'This is for testing email using smtp.',
+                    'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
+                ];
+
+                if ($currentUserID != '01645') {
+
+                    User::where('UserID', $supervisorID)->get()->each(function ($user) use ($mailData) {
+                        Mail::to($user->Email)->send(new NotificationMail($mailData));
+                    });
+                } else {
+                    $additionalMail = [
+                        'raihana@aci-bd.com',
+                        'jasmin@aci-bd.com',
+                        'joyanta@aci-bd.com',
+                    ];
+
+                    foreach ($additionalMail as $email) {
+                        Mail::to($email)->send(new NotificationMail($mailData));
+                    }
+                }
+
+            } else {
                 if ($UserLevel == 'Level2') {
                     $proposalMaster->update([
                         'PresentDesk' => $proposalMaster->CreatedBy,
@@ -347,19 +403,7 @@ class NGFactoryPDController extends Controller
                 }
             }
 
-            if( $currentUserID != '01645'){
-
-                $mailData = [
-                    'title' => 'Proposal Approval Request',
-                    'body' => 'This is for testing email using smtp.',
-                    'link' => route('proposal.request_approval_show', $proposalMaster->ProposalID),
-                   ];
-
-                   User::where('UserID', $supervisorID)->get()->each(function ($user) use ($mailData) {
-                       Mail::to($user->Email)->send(new NotificationMail($mailData));
-                   });
-
-            }
+           
 
 
 
@@ -385,21 +429,21 @@ class NGFactoryPDController extends Controller
         DB::beginTransaction();
 
         try {
-            // Fetch ProposalMaster or fail
+
             $proposalMaster = ProposalMaster::findOrFail($id);
 
-            // Delete Old Reference Statuses
+
             $proposalMaster->referenceStatuses()->delete();
 
-            // Delete Old General Info Details
+
             if ($proposalMaster->generalInfo) {
                 $proposalMaster->generalInfo->details()->delete();
             }
 
-            // Delete Old Forecasts
+
             $proposalMaster->forecasts()->delete();
 
-            // Update ProposalMaster
+
             $proposalMaster->update([
                 'ProductCategory' => $request->ProductCategory,
                 'EvaluatedBy' => $request->ForwardTo ?? null,
@@ -407,7 +451,7 @@ class NGFactoryPDController extends Controller
                 'EditedDate' => now()->toDateString(),
             ]);
 
-            // Insert New Reference Statuses
+
             if (!empty($request->ReferenceStatus)) {
                 foreach ($request->ReferenceStatus as $value) {
                     $proposalMaster->referenceStatuses()->create([
@@ -416,7 +460,7 @@ class NGFactoryPDController extends Controller
                 }
             }
 
-            // Insert New General Info
+
             if ($proposalMaster->generalInfo) {
                 $proposalMaster->generalInfo->update([
                     'GenericName' => $request->GenericName ?? '',
@@ -426,7 +470,7 @@ class NGFactoryPDController extends Controller
                     'OriginatorBrand' => $request->OriginatorBrand ?? '',
                 ]);
 
-                // Insert New General Info Details
+
                 if (!empty($request->ServicesOneStrength)) {
                     foreach ($request->ServicesOneStrength as $key => $value) {
                         $proposalMaster->generalInfo->details()->create([
@@ -444,7 +488,7 @@ class NGFactoryPDController extends Controller
                 }
             }
 
-            // Insert New Forecasts
+
             if (!empty($request->ServicesTwoStrength)) {
                 foreach ($request->ServicesTwoStrength as $key => $value) {
                     $proposalMaster->forecasts()->create([
@@ -511,9 +555,9 @@ class NGFactoryPDController extends Controller
                 'generalInfo.details',
                 'forecasts'
             ])
-            ->where('PresentDesk', auth()->user()->UserID)
-            ->where('CreatedBy', '!=', auth()->user()->UserID) // Ensure correct casing in method name
-            ->get();
+                ->where('PresentDesk', auth()->user()->UserID)
+                ->where('CreatedBy', '!=', auth()->user()->UserID) // Ensure correct casing in method name
+                ->get();
 
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
@@ -556,9 +600,9 @@ class NGFactoryPDController extends Controller
     {
         if ($request->ajax()) {
             $query = ProposalMaster::where('PresentDesk', auth()->user()->UserID)
-            ->Where('CreatedBy', auth()->user()->UserID)
-            ->orderByDesc('ProposalID') // Ordering should come after filtering
-            ->get();
+                ->Where('CreatedBy', auth()->user()->UserID)
+                ->orderByDesc('ProposalID') // Ordering should come after filtering
+                ->get();
             return DataTables::of($query)
                 ->addColumn('ProductCategory', function ($row) {
                     return $row->ProductCategory ?? '-';

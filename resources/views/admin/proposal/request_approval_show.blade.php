@@ -94,7 +94,7 @@
                             <table class="table table-sm table-bordered motors_table">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">Strength & Dosage Form</th>
+                                        <th class="text-center" >Strength & Dosage Form</th>
                                         <th class="text-center">Pack Size</th>
                                         <th class="text-center">Primary Pack</th>
                                         <th class="text-center">MRP/Unit (Tk.)</th>
@@ -110,10 +110,10 @@
                                         <tr>
                                             <td>{{ $service->StrengthDosageForm }}</td>
                                             <td class="text-center">{{ $service->PackSize }}</td>
-                                            <td class="text-right">{{ $service->PrimaryPack }}</td>
-                                            <td class="text-right">{{ $service->MRPUnit }}</td>
-                                            <td class="text-right">{{ $service->MRPPack }}</td>
-                                            <td class="text-right">{{ $service->TP }}</td>
+                                            <td class="text-center">{{ $service->PrimaryPack }}</td>
+                                            <td class="text-center">{{ $service->MRPUnit }}</td>
+                                            <td class="text-center">{{ $service->MRPPack }}</td>
+                                            <td class="text-center">{{ $service->TP }}</td>
                                             <td class="text-center">{{ $service->DCCNumber }}</td>
                                             <td class="text-center">{{ $service->Availability }}</td>
                                         </tr>
@@ -174,7 +174,7 @@
                                             $Year2Unit += $forecast->Year2Unit;
                                             $Year2Value += $forecast->Year2Value;
                                             $Year3Unit += $forecast->Year3Unit;
-                                            $Year3Unit += $forecast->Year3Unit;
+                                            $Year3Value += $forecast->Year3Value;
                                         @endphp
                                     @endforeach
 
