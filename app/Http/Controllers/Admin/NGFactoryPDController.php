@@ -353,8 +353,7 @@ class NGFactoryPDController extends Controller
 
                     $additionalMail = [
                         'raihana@aci-bd.com',
-                        'jasmin@aci-bd.com',
-                        'joyanta@aci-bd.com',
+                        'jasmin@aci-bd.com'
                     ];
 
                     foreach ($additionalMail as $email) {
@@ -403,7 +402,7 @@ class NGFactoryPDController extends Controller
                 }
             }
 
-           
+
 
 
 
